@@ -41,13 +41,14 @@ import androidx.compose.ui.unit.dp
         onNavigateToAccount: () -> Unit,
         onNavigateToSettings: () -> Unit,
         onLogout: () -> Unit
+
     ) {
 
         val currentUser = authManager.getCurrentUser()
 
         Box(modifier = Modifier.fillMaxSize()) {
             Image(
-                painter = painterResource(id = R.drawable.backgroundmain),
+                painter = painterResource(id = R.drawable.back),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop

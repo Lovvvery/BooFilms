@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,7 +40,8 @@ import androidx.compose.ui.unit.sp
         authManager: AuthManager,
         onLoginSuccess: () -> Unit = {},
         onRegisterClick: () -> Unit = {},
-        onLoginClick: (String, String) -> Unit = { _, _ -> }
+        onLoginClick: (String, String) -> Unit = { _, _ -> },
+        onGuestLogin: () -> Unit
     ) {
         var username by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
@@ -49,7 +51,7 @@ import androidx.compose.ui.unit.sp
 
         Box(modifier = Modifier.fillMaxSize()) {
             Image(
-                painter = painterResource(id = R.drawable.background),
+                painter = painterResource(id = R.drawable.main),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
@@ -156,6 +158,13 @@ import androidx.compose.ui.unit.sp
                         color = Color.White
                     )
                 }
+            }
+
+            TextButton(onClick = {
+                authManager.logout()
+                onLoginSuccess()
+            }) {
+                Text("Войти как гость")
             }
 
             Text(

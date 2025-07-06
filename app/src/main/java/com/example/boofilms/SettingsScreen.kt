@@ -42,9 +42,8 @@ fun SettingsScreen(
     val currentUser = authManager.getCurrentUser()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Фоновое изображение
         Image(
-            painter = painterResource(id = R.drawable.backgroundmain),
+            painter = painterResource(id = R.drawable.back),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop

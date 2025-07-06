@@ -49,19 +49,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import coil.compose.rememberImagePainter
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
-
     authManager: AuthManager,
     onBackClick: () -> Unit,
     onNavigateToSettings: () -> Unit
@@ -69,11 +62,10 @@ fun AccountScreen(
     var description by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var showSuccess by remember { mutableStateOf(false) }
-
-
-    val currentUser = authManager.getCurrentUser()
-    val userId = authManager.getCurrentUserId()
     var savedDescription by remember { mutableStateOf("") }
+
+    val currentUser = authManager.getCurrentUser() ?: "Гость"
+    val userId = authManager.getCurrentUserId()
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -83,7 +75,6 @@ fun AccountScreen(
             authManager.updateUserAvatar(userId, it.toString())
         }
     }
-
 
     LaunchedEffect(userId) {
         authManager.getUserData(userId)?.let { userData ->
@@ -97,26 +88,14 @@ fun AccountScreen(
         }
     }
 
-    if (showSuccess) {
-        AlertDialog(
-            onDismissRequest = { showSuccess = false },
-            title = { Text("Успешно") },
-            text = { Text("Данные сохранены") },
-            confirmButton = {
-                Button(onClick = { showSuccess = false }) {
-                    Text("OK")
-                }
-            }
-        )
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
-            painter = painterResource(id = R.drawable.backgroundmain),
+            painter = painterResource(id = R.drawable.back),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -191,14 +170,12 @@ fun AccountScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = currentUser ?: "Гость",
+                    text = currentUser,
                     style = MaterialTheme.typography.headlineMedium,
                     color = Color.White
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
-
-
 
                 OutlinedTextField(
                     value = description,
@@ -223,7 +200,7 @@ fun AccountScreen(
                 Button(
                     onClick = {
                         authManager.updateUserDescription(userId, description)
-                        savedDescription = description // Сохраняем текст для отображения
+                        savedDescription = description
                         showSuccess = true
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -234,6 +211,7 @@ fun AccountScreen(
                 ) {
                     Text("Сохранить изменения")
                 }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 if (savedDescription.isNotEmpty()) {
@@ -252,20 +230,21 @@ fun AccountScreen(
                         )
                     }
                 }
-                if (showSuccess) {
-                    AlertDialog(
-                        onDismissRequest = { showSuccess = false },
-                        title = { Text("Успешно", color = Color.White) },
-                        text = { Text("Данные сохранены", color = Color.White) },
-                        confirmButton = {
-                            Button(onClick = { showSuccess = false }) {
-                                Text("OK")
-                            }
-                        },
-                        containerColor = Color(0xFF282847)
-                    )
-                }
             }
+        }
+
+        if (showSuccess) {
+            AlertDialog(
+                onDismissRequest = { showSuccess = false },
+                title = { Text("Успешно", color = Color.White) },
+                text = { Text("Данные сохранены", color = Color.White) },
+                confirmButton = {
+                    Button(onClick = { showSuccess = false }) {
+                        Text("OK")
+                    }
+                },
+                containerColor = Color(0xFF282847)
+            )
         }
     }
 }

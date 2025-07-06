@@ -6,13 +6,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -31,34 +40,35 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-    @Composable
-    fun RegistrationScreen(
-        authManager: AuthManager,
-        onRegisterSuccess: () -> Unit,
-        onBackClick: () -> Unit,
-        onLoginClick: () -> Unit
-    ) {
-        var username by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var confirmPassword by remember { mutableStateOf("") }
-        var isLoading by remember { mutableStateOf(false) }
-        var errorMessage by remember { mutableStateOf<String?>(null) }
-        val roundedShape = RoundedCornerShape(12.dp)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RegistrationScreen(
+    authManager: AuthManager,
+    onRegisterSuccess: () -> Unit,
+    onBackClick: () -> Unit,
+    onLoginClick: () -> Unit
+) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val roundedShape = RoundedCornerShape(12.dp)
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            Image(
-                painter = painterResource(id = R.drawable.background),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Фоновое изображение
+        Image(
+            painter = painterResource(id = R.drawable.back),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.3f))
-            )
-        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.3f))
+        )
 
         Column(
             modifier = Modifier
@@ -67,6 +77,20 @@ import androidx.compose.ui.unit.sp
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Назад",
+                    tint = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedTextField(
                 value = username,
@@ -134,43 +158,52 @@ import androidx.compose.ui.unit.sp
                 Text(
                     text = it,
                     color = Color.Red,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth()
                 )
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
             Button(
                 onClick = {
-                    if (username.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
-                        errorMessage = "Заполните все поля"
-                        return@Button
+                    when {
+                        username.isBlank() || password.isBlank() || confirmPassword.isBlank() -> {
+                            errorMessage = "Заполните все поля"
+                        }
+                        password != confirmPassword -> {
+                            errorMessage = "Пароли не совпадают"
+                        }
+                        password.length < 6 -> {
+                            errorMessage = "Пароль должен содержать минимум 6 символов"
+                        }
+                        username.length < 3 -> {
+                            errorMessage = "Имя пользователя слишком короткое"
+                        }
+                        else -> {
+                            isLoading = true
+                            errorMessage = null
+
+                            if (authManager.register(username, password)) {
+                                onRegisterSuccess()
+                            } else {
+                                errorMessage = "Имя пользователя уже занято"
+                            }
+
+                            isLoading = false
+                        }
                     }
-
-                    if (password != confirmPassword) {
-                        errorMessage = "Пароли не совпадают"
-                        return@Button
-                    }
-
-                    if (password.length < 6) {
-                        errorMessage = "Пароль должен содержать минимум 6 символов"
-                        return@Button
-                    }
-
-                    isLoading = true
-                    errorMessage = null
-
-                    if (authManager.register(username, password)) {
-                        onRegisterSuccess()
-                    } else {
-                        errorMessage = "Имя пользователя уже занято"
-                    }
-
-                    isLoading = false
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
                 shape = roundedShape,
-                enabled = !isLoading
+                enabled = !isLoading,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF6200EE),
+                    contentColor = Color.White
+                )
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
@@ -181,8 +214,7 @@ import androidx.compose.ui.unit.sp
                     Text(
                         text = "ЗАРЕГИСТРИРОВАТЬСЯ",
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
@@ -198,3 +230,4 @@ import androidx.compose.ui.unit.sp
             )
         }
     }
+}

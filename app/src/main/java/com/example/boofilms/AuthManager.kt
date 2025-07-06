@@ -32,12 +32,19 @@ class SharedPrefsAuthManager(private val context: Context) : AuthManager {
         return if (!dbHelper.isUsernameExists(username)) {
             val userId = dbHelper.addUser(username, password)
             if (userId > 0) {
+                // Сохраняем данные пользователя
                 saveUserData(
                     userId.toString(),
                     username,
                     "",
                     null
                 )
+                // Автоматически входим после регистрации
+                authPrefs.edit().apply {
+                    putString("current_user", username)
+                    putString("current_user_id", userId.toString())
+                    putBoolean("is_logged_in", true) // Добавляем флаг авторизации
+                }.apply()
                 true
             } else {
                 false
@@ -50,10 +57,11 @@ class SharedPrefsAuthManager(private val context: Context) : AuthManager {
     override fun login(username: String, password: String): Boolean {
         return if (dbHelper.checkUser(username, password)) {
             val userId = dbHelper.getUserId(username)
-            authPrefs.edit()
-                .putString("current_user", username)
-                .putString("current_user_id", userId.toString())
-                .apply()
+            authPrefs.edit().apply {
+                putString("current_user", username)
+                putString("current_user_id", userId.toString())
+                putBoolean("is_logged_in", true)
+            }.apply()
             true
         } else {
             false
@@ -61,22 +69,32 @@ class SharedPrefsAuthManager(private val context: Context) : AuthManager {
     }
 
     override fun logout() {
-        authPrefs.edit()
-            .remove("current_user")
-            .remove("current_user_id")
-            .apply()
+        authPrefs.edit().apply {
+            remove("current_user")
+            remove("current_user_id")
+            putBoolean("is_logged_in", false) // Явно указываем выход
+        }.apply()
     }
 
     override fun isLoggedIn(): Boolean {
-        return authPrefs.getString("current_user_id", null) != null
+        return authPrefs.getBoolean("is_logged_in", false) &&
+                authPrefs.getString("current_user_id", null) != null
     }
 
     override fun getCurrentUser(): String? {
-        return authPrefs.getString("current_user", null)
+        return if (isLoggedIn()) {
+            authPrefs.getString("current_user", null) ?: "Гость"
+        } else {
+            "Гость"
+        }
     }
 
     override fun getCurrentUserId(): String {
-        return authPrefs.getString("current_user_id", "") ?: ""
+        return if (isLoggedIn()) {
+            authPrefs.getString("current_user_id", "") ?: ""
+        } else {
+            ""
+        }
     }
 
     override fun getUserData(userId: String): AuthManager.UserData? {
