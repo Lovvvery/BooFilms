@@ -39,7 +39,6 @@ class SharedPrefsAuthManager(private val context: Context) : AuthManager {
                     "",
                     null
                 )
-                // Автоматически входим после регистрации
                 authPrefs.edit().apply {
                     putString("current_user", username)
                     putString("current_user_id", userId.toString())
@@ -72,7 +71,7 @@ class SharedPrefsAuthManager(private val context: Context) : AuthManager {
         authPrefs.edit().apply {
             remove("current_user")
             remove("current_user_id")
-            putBoolean("is_logged_in", false) // Явно указываем выход
+            putBoolean("is_logged_in", false)
         }.apply()
     }
 

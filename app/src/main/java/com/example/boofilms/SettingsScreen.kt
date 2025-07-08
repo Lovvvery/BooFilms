@@ -49,7 +49,6 @@ fun SettingsScreen(
             contentScale = ContentScale.Crop
         )
 
-        // Затемнение фона
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -85,7 +84,6 @@ fun SettingsScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.Top
             ) {
-                // Информация о пользователе
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
@@ -110,7 +108,6 @@ fun SettingsScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Настройки приложения
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
@@ -127,7 +124,6 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Здесь можно добавить другие настройки
                         Text(
                             text = "Версия: 1.0.0",
                             color = Color.White
@@ -137,7 +133,6 @@ fun SettingsScreen(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Кнопка выхода
                 Button(
                     onClick = {
                         authManager.logout()

@@ -1,17 +1,16 @@
 package com.example.boofilms
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavType
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import com.example.boofilms.viewmodel.MovieViewModel
 
 @Composable
 fun AuthNavigation(authManager: AuthManager) {
@@ -27,12 +26,11 @@ fun AuthNavigation(authManager: AuthManager) {
                 authManager = authManager,
                 onLoginSuccess = {
                     navController.navigate("main") {
-                        // Очищаем back stack до экрана входа
                         popUpTo("login") { inclusive = true }
                     }
                 },
                 onRegisterClick = { navController.navigate("registration") },
-                onGuestLogin = { // Добавлен гостевой вход
+                onGuestLogin = {
                     navController.navigate("main") {
                         popUpTo("login") { inclusive = true }
                     }
@@ -69,24 +67,20 @@ fun AuthNavigation(authManager: AuthManager) {
         }
 
         composable("catalog") {
-            val viewModel: MovieViewModel = hiltViewModel()
-
+            val viewModel: MovieViewModel = viewModel() // или hiltViewModel()
             val movies by viewModel.movies.collectAsState()
-            val isLoading by viewModel.isLoading.collectAsState()
+            val isLoading by viewModel.loading.collectAsState()
 
-            LaunchedEffect(Unit) {
-                if (movies.isEmpty()) {
-                    viewModel.loadMovies()
+            FilmCatalogScreen(
+                onMenuClick = {  },
+                onAccountClick = { navController.navigate("account") },
+                onBackClick = { navController.popBackStack() },
+                movies = movies,
+                isLoading = isLoading,
+                onMovieClick = { movie ->
+                    navController.navigate("movieDetails/${movie.id}")
                 }
-            }
-        }
-
-        composable(
-            "filmDetails/{movieId}",
-            arguments = listOf(navArgument("movieId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val movieId = backStackEntry.arguments?.getInt("movieId") ?: 0
-            MovieDetailsScreen(movieId = movieId)
+            )
         }
 
         composable("account") {

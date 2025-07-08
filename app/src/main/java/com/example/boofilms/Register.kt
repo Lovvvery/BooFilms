@@ -56,7 +56,6 @@ fun RegistrationScreen(
     val roundedShape = RoundedCornerShape(12.dp)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Фоновое изображение
         Image(
             painter = painterResource(id = R.drawable.back),
             contentDescription = null,
